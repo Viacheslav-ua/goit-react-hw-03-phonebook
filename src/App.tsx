@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ContactForm from "./components/ContactForm";
 import ContactList from "./components/ContactList";
 import Filter from "./components/Filter";
+import Modal from "./components/Modal";
 import S from "./App.module.css";
 
 type contactsType = {
@@ -25,6 +26,19 @@ class App extends Component {
     ],
     filter: "",
   };
+
+  componentDidMount() {
+    const localData = localStorage.getItem("contacts");
+    if (localData) {
+      this.setState({ contacts: JSON.parse(localData) });
+    }
+  }
+
+  componentDidUpdate(prevProps: StateType, prevState: StateType) {
+    if (this.state.contacts !== prevState.contacts) {
+      localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
+    }
+  }
 
   findName = (str: string): boolean => {
     return this.state.contacts.find((item) =>
@@ -50,20 +64,8 @@ class App extends Component {
     }));
   };
 
-  componentDidMount() {
-    const localData = localStorage.getItem("contacts");
-    if (localData) {
-      this.setState({ contacts: JSON.parse(localData) });
-    }
-  }
-
-  componentDidUpdate(prevProps: StateType, prevState: StateType) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
-    }
-  }
-
   render() {
+    const { contacts, filter } = this.state;
     return (
       <div className={S.container}>
         <h1>Phonebook</h1>
@@ -71,15 +73,11 @@ class App extends Component {
           formSubmit={this.formSubmitHandler}
           findName={this.findName}
         />
-
         <h2 className={S.title}>Contacts</h2>
-        <Filter
-          filterValue={this.state.filter}
-          handleChangeFilter={this.changeFilter}
-        />
+        <Filter filterValue={filter} handleChangeFilter={this.changeFilter} />
         <ContactList
-          list={this.state.contacts}
-          filterValue={this.state.filter}
+          list={contacts}
+          filterValue={filter}
           deleteContact={this.deleteContact}
         />
       </div>
